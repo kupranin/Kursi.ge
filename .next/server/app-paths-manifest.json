@@ -1,0 +1,7 @@
+{
+  "/api/rewards/spin-registration-wheel/route": "app/api/rewards/spin-registration-wheel/route.js",
+  "/api/rewards/wheel-eligibility/route": "app/api/rewards/wheel-eligibility/route.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/page": "app/page.js",
+  "/register/success/page": "app/register/success/page.js"
+}
