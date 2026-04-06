@@ -1,7 +1,0 @@
-{
-  "/api/rewards/spin-registration-wheel/route": "/api/rewards/spin-registration-wheel",
-  "/api/rewards/wheel-eligibility/route": "/api/rewards/wheel-eligibility",
-  "/_not-found/page": "/_not-found",
-  "/page": "/",
-  "/register/success/page": "/register/success"
-}
