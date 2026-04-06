@@ -26,10 +26,7 @@ body {
 .wheel-modal-overlay {
   position: fixed;
   inset: 0;
-  background:
-    radial-gradient(ellipse 85% 70% at 50% 45%, rgba(168, 98, 148, 0.14) 0%, transparent 55%),
-    radial-gradient(circle at 50% 50%, transparent 0%, rgba(18, 8, 16, 0.55) 100%),
-    linear-gradient(165deg, rgba(40, 16, 32, 0.78) 0%, rgba(22, 10, 20, 0.88) 100%);
+  background: rgba(33, 18, 29, 0.48);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -40,15 +37,12 @@ body {
 
 .wheel-modal-card {
   width: min(620px, 100%);
-  border-radius: 28px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, #faf5f9 38%, #f5eef6 100%);
-  border: 1px solid rgba(146, 88, 130, 0.22);
+  border-radius: 30px;
+  background: #f8f3f6;
+  border: 1px solid rgba(156, 106, 140, 0.22);
   box-shadow:
-    0 4px 24px rgba(60, 22, 45, 0.08),
-    0 28px 64px rgba(38, 14, 32, 0.36),
-    0 1px 0 rgba(255, 255, 255, 0.95) inset,
-    0 -1px 0 rgba(120, 60, 95, 0.06) inset;
+    0 12px 34px rgba(46, 21, 38, 0.18),
+    0 1px 0 rgba(255, 255, 255, 0.75) inset;
   padding: 28px;
   text-align: center;
   position: relative;
@@ -57,10 +51,11 @@ body {
 
 .wheel-modal-card h2 {
   margin: 0;
-  font-size: clamp(28px, 3.2vw, 36px);
-  letter-spacing: -0.01em;
+  font-size: clamp(30px, 3.4vw, 38px);
+  letter-spacing: 0;
   line-height: 1.18;
-  color: #241018;
+  color: #2f1424;
+  text-shadow: none;
   font-weight: 700;
 }
 
@@ -78,7 +73,7 @@ body {
   font-size: 16px;
   line-height: 1.5;
   letter-spacing: 0.015em;
-  color: #4a3545;
+  color: #4f3346;
 }
 
 .wheel-subheadline--intro {
@@ -113,21 +108,16 @@ body {
 }
 
 .wheel-primary {
-  background: linear-gradient(95deg, #5c1a52 0%, #742663 42%, #943074 72%, #a84888 100%);
+  background: #7a1e4d;
   color: #fff;
-  box-shadow:
-    0 2px 0 rgba(255, 255, 255, 0.2) inset,
-    0 10px 24px rgba(70, 22, 58, 0.38),
-    0 4px 12px rgba(90, 28, 72, 0.22);
+  box-shadow: 0 6px 14px rgba(72, 26, 56, 0.22);
   letter-spacing: 0.02em;
 }
 
 .wheel-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow:
-    0 2px 0 rgba(255, 255, 255, 0.22) inset,
-    0 14px 32px rgba(70, 22, 58, 0.42),
-    0 6px 16px rgba(90, 28, 72, 0.28);
+  transform: translateY(-1px);
+  background: #6b1f46;
+  box-shadow: 0 8px 16px rgba(72, 26, 56, 0.24);
 }
 
 .wheel-primary:focus-visible,
@@ -147,17 +137,17 @@ body {
 }
 
 .wheel-secondary {
-  color: #5a284c;
-  background: linear-gradient(180deg, #fdf8fb 0%, #f6ebf2 100%);
-  border: 1px solid rgba(138, 82, 118, 0.28);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  color: #5c2b4f;
+  background: #fbf7fa;
+  border: 1px solid rgba(147, 88, 126, 0.3);
+  box-shadow: 0 4px 10px rgba(94, 48, 77, 0.08);
   letter-spacing: 0.018em;
 }
 
 .wheel-secondary:hover:not(:disabled) {
   transform: translateY(-1px);
-  background: linear-gradient(180deg, #fff 0%, #f3e4ec 100%);
-  border-color: rgba(138, 82, 118, 0.38);
+  background: #fff;
+  border-color: rgba(147, 88, 126, 0.42);
 }
 
 .wheel-close {
@@ -167,8 +157,8 @@ body {
   width: 36px;
   height: 36px;
   border-radius: 999px;
-  background: #f2eaf0;
-  border: 1px solid rgba(123, 42, 104, 0.24);
+  background: #f3e9f0;
+  border: 1px solid rgba(126, 58, 105, 0.26);
   color: #5f2f53;
   font-size: 24px;
   line-height: 1;
@@ -196,8 +186,7 @@ body {
   aspect-ratio: 1 / 1;
   margin: 0 auto 18px;
   position: relative;
-  filter: drop-shadow(0 20px 36px rgba(42, 14, 34, 0.28))
-    drop-shadow(0 8px 16px rgba(90, 40, 70, 0.12));
+  filter: drop-shadow(0 14px 26px rgba(54, 20, 42, 0.2));
 }
 
 .wheel-stage.is-spinning .wheel-root {
@@ -219,17 +208,12 @@ body {
 .wheel-pointer-glow {
   position: absolute;
   top: 6px;
-  width: 36px;
-  height: 28px;
-  margin-left: -18px;
+  width: 30px;
+  height: 22px;
+  margin-left: -15px;
   left: 50%;
-  background: radial-gradient(
-    ellipse 80% 90% at 50% 0%,
-    rgba(212, 120, 180, 0.55) 0%,
-    rgba(130, 60, 110, 0.15) 45%,
-    transparent 70%
-  );
-  filter: blur(5px);
+  background: radial-gradient(ellipse 80% 90% at 50% 0%, rgba(196, 96, 154, 0.2) 0%, transparent 70%);
+  filter: blur(4px);
   z-index: 0;
 }
 
@@ -240,22 +224,15 @@ body {
   height: 0;
   border-left: 15px solid transparent;
   border-right: 15px solid transparent;
-  border-top: 24px solid #381028;
-  filter: drop-shadow(0 2px 0 rgba(255, 240, 248, 0.35))
-    drop-shadow(0 4px 6px rgba(24, 8, 18, 0.5))
-    drop-shadow(0 10px 18px rgba(90, 32, 68, 0.4));
+  border-top: 22px solid #7a1e4d;
+  filter: drop-shadow(0 3px 6px rgba(56, 20, 43, 0.22));
 }
 
 .wheel-glow {
   position: absolute;
   inset: -14px;
   border-radius: 999px;
-  background: radial-gradient(
-    circle,
-    rgba(160, 90, 135, 0.28) 0%,
-    rgba(120, 55, 95, 0.14) 40%,
-    rgba(123, 42, 104, 0) 65%
-  );
+  background: radial-gradient(circle, rgba(172, 88, 140, 0.14) 0%, rgba(123, 42, 104, 0) 62%);
   z-index: 0;
 }
 
@@ -264,16 +241,14 @@ body {
   height: 100%;
   border-radius: 50%;
   overflow: hidden;
-  border: 11px solid #ead0df;
+  border: 10px solid #ead8e3;
   background: #2c0e18;
   position: relative;
   z-index: 1;
   transition: none;
   box-shadow:
-    0 12px 28px rgba(36, 12, 28, 0.35),
-    0 3px 0 rgba(255, 255, 255, 0.45) inset,
-    inset 0 8px 20px rgba(255, 248, 252, 0.18),
-    inset 0 -14px 28px rgba(20, 6, 14, 0.4);
+    0 12px 24px rgba(36, 12, 28, 0.2),
+    0 2px 0 rgba(255, 255, 255, 0.5) inset;
 }
 
 .wheel-disc--spinning {
@@ -283,11 +258,8 @@ body {
 .wheel-disc.winner-highlight {
   animation: winner-wheel-glow 2.2s ease-in-out infinite;
   box-shadow:
-    0 16px 36px rgba(50, 20, 43, 0.32),
-    0 0 0 9px rgba(180, 100, 150, 0.22),
-    0 0 48px rgba(140, 72, 115, 0.28),
-    inset 0 8px 18px rgba(255, 248, 252, 0.25),
-    inset 0 -12px 24px rgba(20, 6, 14, 0.32);
+    0 12px 26px rgba(50, 20, 43, 0.24),
+    0 0 0 5px rgba(180, 100, 150, 0.18);
 }
 
 .wheel-track {
@@ -296,30 +268,12 @@ body {
   border-radius: 999px;
   background: conic-gradient(
     from 0deg at 50% 50%,
-    #3a0a18 0deg,
-    #4f1530 28deg,
-    #4f1530 28deg,
-    #3e0f22 60deg,
-    #4a1228 60deg,
-    #5e1f3a 88deg,
-    #5e1f3a 88deg,
-    #481426 120deg,
-    #50182e 120deg,
-    #682448 148deg,
-    #682448 148deg,
-    #4a162c 180deg,
-    #521c36 180deg,
-    #6e2e4e 208deg,
-    #6e2e4e 208deg,
-    #501a32 240deg,
-    #451528 240deg,
-    #5a2040 268deg,
-    #5a2040 268deg,
-    #3e1024 300deg,
-    #421124 300deg,
-    #561c38 330deg,
-    #561c38 330deg,
-    #3a0a18 360deg
+    #7a1e4d 0deg 60deg,
+    #9c2f63 60deg 120deg,
+    #b83c73 120deg 180deg,
+    #c44c84 180deg 240deg,
+    #6b1f46 240deg 300deg,
+    #a53667 300deg 360deg
   );
 }
 
@@ -330,8 +284,8 @@ body {
   pointer-events: none;
   z-index: 1;
   box-shadow:
-    inset 0 5px 18px rgba(255, 255, 255, 0.12),
-    inset 0 -24px 40px rgba(12, 4, 10, 0.45);
+    inset 0 2px 6px rgba(255, 255, 255, 0.1),
+    inset 0 -6px 12px rgba(10, 6, 9, 0.18);
 }
 
 .wheel-segment-lines {
@@ -343,11 +297,10 @@ body {
   background: repeating-conic-gradient(
     from 0deg at 50% 50%,
     transparent 0deg 59.35deg,
-    rgba(255, 255, 255, 0.38) 59.35deg 59.85deg,
+    rgba(255, 255, 255, 0.46) 59.3deg 59.82deg,
     transparent 59.85deg 60deg
   );
-  mix-blend-mode: soft-light;
-  opacity: 0.85;
+  opacity: 1;
 }
 
 .wheel-surface-gloss {
@@ -357,13 +310,11 @@ body {
   pointer-events: none;
   z-index: 1;
   background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.22) 0%,
-    rgba(255, 255, 255, 0) 38%,
-    rgba(255, 255, 255, 0) 62%,
-    rgba(80, 20, 50, 0.12) 100%
+    165deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0) 42%,
+    rgba(255, 255, 255, 0.04) 100%
   );
-  mix-blend-mode: overlay;
 }
 
 .wheel-top-sheen {
@@ -373,12 +324,7 @@ body {
   border-radius: 50%;
   pointer-events: none;
   z-index: 1;
-  background: radial-gradient(
-    ellipse 100% 80% at 50% 0%,
-    rgba(255, 245, 252, 0.35) 0%,
-    transparent 72%
-  );
-  mix-blend-mode: soft-light;
+  background: radial-gradient(ellipse 100% 80% at 50% 0%, rgba(255, 255, 255, 0.14) 0%, transparent 72%);
 }
 
 .wheel-label-layer {
@@ -395,21 +341,20 @@ body {
   font-size: clamp(3.1px, 1.18vw, 4px);
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: #fffafd;
-  fill: #fffafd;
+  color: #fffdfd;
+  fill: #fffdfd;
   line-height: 1.2;
   text-align: center;
   paint-order: stroke;
-  stroke: rgba(38, 10, 24, 0.5);
-  stroke-width: 0.4px;
+  stroke: rgba(46, 16, 32, 0.38);
+  stroke-width: 0.32px;
   text-shadow:
-    0 1px 2px rgba(28, 8, 18, 0.45),
-    0 0 10px rgba(255, 200, 235, 0.12);
+    0 1px 1px rgba(24, 8, 16, 0.3);
 }
 
 .wheel-prize-value {
   margin: -6px 0 14px;
-  color: #5a1f4a;
+  color: #642652;
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -424,14 +369,9 @@ body {
   border-radius: 50%;
   z-index: 2;
   pointer-events: none;
-  background: radial-gradient(
-    circle,
-    rgba(255, 210, 232, 0.35) 0%,
-    rgba(168, 90, 140, 0.12) 45%,
-    transparent 68%
-  );
-  filter: blur(2px);
-  opacity: 0.95;
+  background: radial-gradient(circle, rgba(255, 220, 240, 0.18) 0%, transparent 66%);
+  filter: blur(1px);
+  opacity: 0.75;
 }
 
 .wheel-center-cap {
@@ -442,13 +382,11 @@ body {
   transform: translate(-50%, -50%);
   border-radius: 50%;
   background:
-    radial-gradient(circle at 32% 22%, #ffffff 0%, #f5e8f0 55%, #e8d0e0 100%);
+    linear-gradient(180deg, #fffafc 0%, #f2e4ec 100%);
   border: 3px solid rgba(255, 252, 255, 0.95);
   box-shadow:
-    0 4px 0 rgba(255, 255, 255, 0.65) inset,
-    0 12px 22px rgba(42, 14, 34, 0.38),
-    0 4px 10px rgba(100, 48, 78, 0.18),
-    inset 0 -6px 14px rgba(120, 70, 100, 0.08);
+    0 2px 0 rgba(255, 255, 255, 0.65) inset,
+    0 8px 14px rgba(60, 26, 48, 0.18);
   z-index: 3;
   display: flex;
   align-items: center;
@@ -467,7 +405,7 @@ body {
   object-fit: contain;
   border-radius: 18%;
   pointer-events: none;
-  filter: drop-shadow(0 2px 4px rgba(42, 14, 34, 0.2));
+  filter: none;
 }
 
 .wheel-stage {
@@ -487,15 +425,8 @@ body {
   border-radius: 50%;
   pointer-events: none;
   z-index: 0;
-  background: radial-gradient(
-    circle,
-    rgba(152, 88, 132, 0.14) 0%,
-    rgba(120, 60, 100, 0.06) 42%,
-    transparent 68%
-  );
-  box-shadow:
-    inset 0 0 80px rgba(88, 40, 72, 0.08),
-    inset 0 0 28px rgba(40, 14, 32, 0.04);
+  background: radial-gradient(circle, rgba(170, 96, 144, 0.08) 0%, transparent 70%);
+  box-shadow: none;
 }
 
 .wheel-stage > * {
