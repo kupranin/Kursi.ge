@@ -14,12 +14,13 @@ export function RegistrationWheelModal(props: {
   onDone: () => void;
   forceOpen?: boolean;
 }) {
+  const forcePreview = props.forceOpen === true;
   const [demoMode, setDemoMode] = useState(false);
   const previewMode =
-    demoMode || props.forceOpen === true || process.env.NODE_ENV === "development";
-  const [open, setOpen] = useState(false);
+    demoMode || forcePreview || process.env.NODE_ENV === "development";
+  const [open, setOpen] = useState(forcePreview);
   const [dismissedBeforeSpin, setDismissedBeforeSpin] = useState(false);
-  const [loadingEligibility, setLoadingEligibility] = useState(true);
+  const [loadingEligibility, setLoadingEligibility] = useState(!forcePreview);
   const [spinning, setSpinning] = useState(false);
   const [spinSeed, setSpinSeed] = useState(0);
   const [winningSegmentIndex, setWinningSegmentIndex] = useState<number | null>(null);
