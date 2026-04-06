@@ -12,6 +12,8 @@ const VIEWBOX_SIZE = 100;
 const CENTER = VIEWBOX_SIZE / 2;
 const WHEEL_RADIUS = VIEWBOX_SIZE / 2;
 const LABEL_RADIUS = WHEEL_RADIUS * 0.68;
+const SEGMENT_ANGLE = 360 / WHEEL_PRIZE_TABLE.length;
+const BASE_SEGMENT_COLORS = ["#5B2E8F", "#7B4DFF", "#9A6CFF", "#5B2E8F", "#7B4DFF", "#9A6CFF"];
 
 function splitIntoBalancedLines(label: string) {
   const words = label.trim().split(/\s+/);
@@ -89,6 +91,22 @@ export function Wheel(props: {
   }, [props.spinning, props.winningSegmentIndex]);
 
   const rotation = props.winningSegmentIndex === null ? 0 : targetRotation;
+  const trackBackground = useMemo(() => {
+    const colors = [...BASE_SEGMENT_COLORS];
+    if (props.highlightWinner && props.winningSegmentIndex !== null) {
+      colors[props.winningSegmentIndex] = "#1ED760";
+    }
+
+    const stops = colors
+      .map((color, index) => {
+        const start = index * SEGMENT_ANGLE;
+        const end = start + SEGMENT_ANGLE;
+        return `${color} ${start}deg ${end}deg`;
+      })
+      .join(", ");
+
+    return `conic-gradient(from 0deg at 50% 50%, ${stops})`;
+  }, [props.highlightWinner, props.winningSegmentIndex]);
 
   return (
     <div className="wheel-root">
@@ -105,7 +123,7 @@ export function Wheel(props: {
           transform: `rotate(${rotation}deg)`
         }}
       >
-        <div className="wheel-track" />
+        <div className="wheel-track" style={{ background: trackBackground }} />
         <div className="wheel-inner-depth" aria-hidden />
         <div className="wheel-segment-lines" aria-hidden />
         <div className="wheel-surface-gloss" aria-hidden />
