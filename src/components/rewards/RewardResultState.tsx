@@ -4,8 +4,7 @@ import { getPrizeBySegmentIndex } from "@/components/rewards/prizeTable";
 export function RewardResultState(props: {
   winningSegmentIndex: number;
   spinSeed: number;
-  onStartConversion: () => void;
-  onLater: () => void;
+  onContinue: () => void;
 }) {
   const wonPrize = getPrizeBySegmentIndex(props.winningSegmentIndex);
 
@@ -26,11 +25,8 @@ export function RewardResultState(props: {
         />
       </div>
       <div className="wheel-actions">
-        <button className="wheel-primary" onClick={props.onStartConversion}>
-          დაიწყე კონვერტაცია
-        </button>
-        <button className="wheel-secondary" onClick={props.onLater}>
-          მოგვიანებით
+        <button className="wheel-primary" onClick={props.onContinue}>
+          გადადი Kursi.ge-ზე
         </button>
       </div>
     </>

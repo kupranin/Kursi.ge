@@ -19,12 +19,16 @@ function withProbability(rows: WheelPrizeRow[]) {
 export async function GET(request: NextRequest) {
   try {
     assertAdminRequest(request.headers);
+    const { searchParams } = new URL(request.url);
+    const campaignId = searchParams.get("campaignId");
     const supabase = createSupabaseAdminClient();
-    const { data, error } = await supabase
+    let statement = supabase
       .from("wheel_prizes")
       .select("*")
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: false });
+    if (campaignId) statement = statement.eq("campaign_id", campaignId);
+    const { data, error } = await statement;
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -43,6 +47,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     const payload = {
+      campaign_id: (body.campaign_id as string | null) ?? null,
       internal_name: body.internal_name as string,
       display_label: body.display_label as string,
       description: (body.description as string | null) ?? null,
@@ -78,6 +83,7 @@ export async function PATCH(request: NextRequest) {
 
     const updates: Record<string, unknown> = {};
     const fields = [
+      "campaign_id",
       "internal_name",
       "display_label",
       "description",

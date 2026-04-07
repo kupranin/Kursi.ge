@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { weightedSelect } from "@/lib/wheel/weightedSelect";
-import type { WheelPrizeRow } from "@/lib/wheel/types";
+import type { WheelCampaignRow, WheelPrizeRow } from "@/lib/wheel/types";
 
 function isEligibleNow(prize: WheelPrizeRow, nowIso: string): boolean {
   if (!prize.is_active) return false;
@@ -21,14 +21,34 @@ export async function POST(request: NextRequest) {
     };
 
     const supabase = createSupabaseAdminClient();
+    const nowIso = new Date().toISOString();
+    const { data: campaignData, error: campaignError } = await supabase
+      .from("wheel_campaigns")
+      .select("*")
+      .eq("is_active", true)
+      .lte("starts_at", nowIso)
+      .gte("ends_at", nowIso)
+      .order("created_at", { ascending: false })
+      .limit(1);
+    if (campaignError) return NextResponse.json({ error: campaignError.message }, { status: 500 });
+
+    const campaign = (campaignData?.[0] ?? null) as WheelCampaignRow | null;
+    if (!campaign) return NextResponse.json({ error: "NO_ACTIVE_CAMPAIGN" }, { status: 400 });
+    if (
+      campaign.total_prizes_limit !== null &&
+      campaign.total_prizes_used >= campaign.total_prizes_limit
+    ) {
+      return NextResponse.json({ error: "CAMPAIGN_STOCK_EXHAUSTED" }, { status: 400 });
+    }
+
     const { data, error } = await supabase
       .from("wheel_prizes")
       .select("*")
+      .eq("campaign_id", campaign.id)
       .eq("is_active", true)
       .order("sort_order", { ascending: true });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-    const nowIso = new Date().toISOString();
     const activePrizes = ((data ?? []) as WheelPrizeRow[]).filter((prize) => isEligibleNow(prize, nowIso));
     if (activePrizes.length === 0) {
       return NextResponse.json({ error: "NO_AVAILABLE_PRIZES" }, { status: 400 });
@@ -43,6 +63,25 @@ export async function POST(request: NextRequest) {
         .eq("id", selected.id)
         .lt("stock_used", selected.stock_limit);
       if (stockError) return NextResponse.json({ error: stockError.message }, { status: 500 });
+    }
+
+    if (campaign.total_prizes_limit !== null) {
+      const { error: campaignStockError } = await supabase
+        .from("wheel_campaigns")
+        .update({ total_prizes_used: campaign.total_prizes_used + 1 })
+        .eq("id", campaign.id)
+        .lt("total_prizes_used", campaign.total_prizes_limit);
+      if (campaignStockError) {
+        return NextResponse.json({ error: campaignStockError.message }, { status: 500 });
+      }
+    } else {
+      const { error: campaignUsageError } = await supabase
+        .from("wheel_campaigns")
+        .update({ total_prizes_used: campaign.total_prizes_used + 1 })
+        .eq("id", campaign.id);
+      if (campaignUsageError) {
+        return NextResponse.json({ error: campaignUsageError.message }, { status: 500 });
+      }
     }
 
     const winPayload = {

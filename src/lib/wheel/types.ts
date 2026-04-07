@@ -1,5 +1,6 @@
 export type WheelPrizeRow = {
   id: string;
+  campaign_id: string | null;
   internal_name: string;
   display_label: string;
   description: string | null;
@@ -11,6 +12,17 @@ export type WheelPrizeRow = {
   ends_at: string | null;
   stock_limit: number | null;
   stock_used: number;
+  created_at: string;
+};
+
+export type WheelCampaignRow = {
+  id: string;
+  name: string;
+  starts_at: string;
+  ends_at: string;
+  total_prizes_limit: number | null;
+  total_prizes_used: number;
+  is_active: boolean;
   created_at: string;
 };
 

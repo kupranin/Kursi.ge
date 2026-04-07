@@ -186,12 +186,10 @@ export function RegistrationWheelModal(props: {
             <RewardResultState
               winningSegmentIndex={winningSegmentIndex}
               spinSeed={spinSeed}
-              onStartConversion={() => {
+              onContinue={() => {
                 setOpen(false);
                 props.onDone();
-              }}
-              onLater={() => {
-                setOpen(false);
+                window.location.href = "https://kursi.ge/ka/";
               }}
             />
           ) : null}
