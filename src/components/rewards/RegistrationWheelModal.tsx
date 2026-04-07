@@ -16,8 +16,7 @@ export function RegistrationWheelModal(props: {
 }) {
   const forcePreview = props.forceOpen === true;
   const [demoMode, setDemoMode] = useState(false);
-  const previewMode =
-    demoMode || forcePreview || process.env.NODE_ENV === "development";
+  const previewMode = demoMode;
   const [open, setOpen] = useState(forcePreview);
   const [dismissedBeforeSpin, setDismissedBeforeSpin] = useState(false);
   const [loadingEligibility, setLoadingEligibility] = useState(!forcePreview);
