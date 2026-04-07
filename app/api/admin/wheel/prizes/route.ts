@@ -4,6 +4,8 @@ import { assertAdminRequest } from "@/lib/adminAuth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { WheelPrizeRow } from "@/lib/wheel/types";
 
+const AUTO_SEGMENT_COLORS = ["#5B2E8F", "#7B4DFF", "#9A6CFF", "#6B1F46", "#A53667", "#B83C73"];
+
 function withProbability(rows: WheelPrizeRow[]) {
   const activeTotalWeight = rows
     .filter((row) => row.is_active)
@@ -14,6 +16,19 @@ function withProbability(rows: WheelPrizeRow[]) {
     probability:
       row.is_active && activeTotalWeight > 0 ? Number(((row.weight / activeTotalWeight) * 100).toFixed(2)) : 0
   }));
+}
+
+async function getAutoSegmentColor(params: {
+  campaignId: string | null;
+  supabase: ReturnType<typeof createSupabaseAdminClient>;
+}) {
+  let statement = params.supabase.from("wheel_prizes").select("id", { count: "exact", head: true });
+  if (params.campaignId) statement = statement.eq("campaign_id", params.campaignId);
+  const { count, error } = await statement;
+  if (error) return null;
+
+  const index = (count ?? 0) % AUTO_SEGMENT_COLORS.length;
+  return AUTO_SEGMENT_COLORS[index];
 }
 
 export async function GET(request: NextRequest) {
@@ -46,15 +61,20 @@ export async function POST(request: NextRequest) {
     assertAdminRequest(request.headers);
     const body = await request.json();
 
+    const campaignId = (body.campaign_id as string | null) ?? null;
+    const supabase = createSupabaseAdminClient();
+    const requestedColor = (body.segment_color as string | null) ?? null;
+    const autoColor = await getAutoSegmentColor({ campaignId, supabase });
+
     const payload = {
-      campaign_id: (body.campaign_id as string | null) ?? null,
+      campaign_id: campaignId,
       internal_name: body.internal_name as string,
       display_label: body.display_label as string,
       description: (body.description as string | null) ?? null,
       weight: Number(body.weight ?? 1),
       is_active: Boolean(body.is_active ?? true),
       sort_order: Number(body.sort_order ?? 0),
-      segment_color: (body.segment_color as string | null) ?? null,
+      segment_color: requestedColor || autoColor,
       starts_at: (body.starts_at as string | null) ?? null,
       ends_at: (body.ends_at as string | null) ?? null,
       stock_limit:
@@ -63,7 +83,6 @@ export async function POST(request: NextRequest) {
           : Number(body.stock_limit)
     };
 
-    const supabase = createSupabaseAdminClient();
     const { data, error } = await supabase.from("wheel_prizes").insert(payload).select("*").single();
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 

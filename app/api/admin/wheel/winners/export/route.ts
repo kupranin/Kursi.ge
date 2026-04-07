@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
       user_id: row.user_id,
       phone: row.phone,
       email: row.email,
+      campaign_name_snapshot: row.campaign_name_snapshot,
       prize_name_snapshot: row.prize_name_snapshot,
       prize_label_snapshot: row.prize_label_snapshot,
       is_redeemed: row.is_redeemed,

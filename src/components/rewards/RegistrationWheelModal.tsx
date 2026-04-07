@@ -5,8 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { RewardIntroState } from "@/components/rewards/RewardIntroState";
 import { RewardModalShell } from "@/components/rewards/RewardModalShell";
 import { RewardResultState } from "@/components/rewards/RewardResultState";
-import { getPrizeIndexFromSpin } from "@/components/rewards/prizeTable";
-import type { SpinResponse } from "@/components/rewards/types";
+import type { SpinResponse, WheelSegment } from "@/components/rewards/types";
 
 const SPIN_MS = 2200;
 
@@ -25,6 +24,8 @@ export function RegistrationWheelModal(props: {
   const [spinning, setSpinning] = useState(false);
   const [spinSeed, setSpinSeed] = useState(0);
   const [winningSegmentIndex, setWinningSegmentIndex] = useState<number | null>(null);
+  const [wonPrizeLabel, setWonPrizeLabel] = useState("");
+  const [segments, setSegments] = useState<WheelSegment[]>([]);
   const [spinCompleted, setSpinCompleted] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const spinButtonRef = useRef<HTMLButtonElement>(null);
@@ -70,6 +71,7 @@ export function RegistrationWheelModal(props: {
   useEffect(() => {
     if (!open) {
       setWinningSegmentIndex(null);
+      setWonPrizeLabel("");
       setSpinCompleted(false);
       setSpinning(false);
       setErrorMessage("");
@@ -82,11 +84,11 @@ export function RegistrationWheelModal(props: {
   }, [open]);
 
   function resolvePreviewSpin(nextSeed: number) {
-    const demoTiers: Array<SpinResponse["rewardTier"]> = ["vip", "vip_plus", "vip_max"];
-    const tier = demoTiers[Math.floor(Math.random() * demoTiers.length)];
-    const index = getPrizeIndexFromSpin({ rewardTier: tier, spinSeed: nextSeed });
+    if (segments.length === 0) return;
+    const index = Math.floor(Math.random() * segments.length);
 
     setWinningSegmentIndex(index);
+    setWonPrizeLabel(segments[index].fullLabel);
     setSpinning(true);
 
     if (spinTimeoutRef.current) clearTimeout(spinTimeoutRef.current);
@@ -96,6 +98,31 @@ export function RegistrationWheelModal(props: {
       spinTimeoutRef.current = null;
     }, SPIN_MS);
   }
+
+  useEffect(() => {
+    let active = true;
+    async function loadSegments() {
+      try {
+        const response = await fetch("/api/wheel/prizes");
+        const payload = await response.json();
+        if (!response.ok || !active) return;
+        const dbSegments = (payload.prizes ?? []).slice(0, 12).map((prize: any) => ({
+          id: String(prize.id),
+          shortLabel: String(prize.display_label),
+          fullLabel: String(prize.display_label),
+          segmentColor: String(prize.segment_color ?? "#7B4DFF")
+        })) as WheelSegment[];
+        setSegments(dbSegments);
+      } catch {
+        if (!active) return;
+        setSegments([]);
+      }
+    }
+    void loadSegments();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!open || spinCompleted) return;
@@ -114,6 +141,10 @@ export function RegistrationWheelModal(props: {
 
   async function handleSpin() {
     setErrorMessage("");
+    if (segments.length === 0) {
+      setErrorMessage("პრიზები დროებით მიუწვდომელია");
+      return;
+    }
     const nextSeed = spinSeed + 1;
     setSpinSeed(nextSeed);
 
@@ -123,7 +154,7 @@ export function RegistrationWheelModal(props: {
     }
 
     try {
-      const response = await fetch("/api/rewards/spin-registration-wheel", {
+      const response = await fetch("/api/wheel/spin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -132,15 +163,14 @@ export function RegistrationWheelModal(props: {
           userId: props.registeredUserId ?? null
         })
       });
-      const payload = (await response.json()) as SpinResponse & { code?: string };
+      const payload = (await response.json()) as SpinResponse & { error?: string };
       if (!response.ok || !payload.success) {
-        throw new Error(payload.code ?? "SPIN_FAILED");
+        throw new Error(payload.error ?? "SPIN_FAILED");
       }
-      const index = getPrizeIndexFromSpin({
-        rewardTier: payload.rewardTier,
-        spinSeed: nextSeed
-      });
+      const index = segments.findIndex((segment) => segment.id === payload.prize.id);
+      if (index < 0) throw new Error("PRIZE_NOT_IN_WHEEL");
       setWinningSegmentIndex(index);
+      setWonPrizeLabel(payload.prize.display_label);
       setSpinning(true);
 
       if (spinTimeoutRef.current) clearTimeout(spinTimeoutRef.current);
@@ -177,6 +207,7 @@ export function RegistrationWheelModal(props: {
               spinning={spinning}
               winningSegmentIndex={winningSegmentIndex}
               spinSeed={spinSeed}
+              segments={segments}
               errorMessage={errorMessage}
               spinButtonRef={spinButtonRef}
               onSpin={handleSpin}
@@ -186,6 +217,8 @@ export function RegistrationWheelModal(props: {
             <RewardResultState
               winningSegmentIndex={winningSegmentIndex}
               spinSeed={spinSeed}
+              wonPrizeLabel={wonPrizeLabel}
+              segments={segments}
               onContinue={() => {
                 setOpen(false);
                 props.onDone();

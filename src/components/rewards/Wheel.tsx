@@ -3,17 +3,12 @@
 import Image from "next/image";
 import { useEffect, useMemo, useRef } from "react";
 
-import {
-  getSegmentCenterClockwiseFromTop,
-  WHEEL_PRIZE_TABLE
-} from "@/components/rewards/prizeTable";
+import type { WheelSegment } from "@/components/rewards/types";
 
 const VIEWBOX_SIZE = 100;
 const CENTER = VIEWBOX_SIZE / 2;
 const WHEEL_RADIUS = VIEWBOX_SIZE / 2;
 const LABEL_RADIUS = WHEEL_RADIUS * 0.68;
-const SEGMENT_ANGLE = 360 / WHEEL_PRIZE_TABLE.length;
-const BASE_SEGMENT_COLORS = ["#5B2E8F", "#7B4DFF", "#9A6CFF", "#5B2E8F", "#7B4DFF", "#9A6CFF"];
 
 function splitIntoBalancedLines(label: string) {
   const words = label.trim().split(/\s+/);
@@ -36,8 +31,10 @@ function computeNextRotation(params: {
   previousTotalRotation: number;
   winningSegmentIndex: number;
   spinSeed: number;
+  segmentCount: number;
 }) {
-  const centerFromTop = getSegmentCenterClockwiseFromTop(params.winningSegmentIndex);
+  const slice = 360 / params.segmentCount;
+  const centerFromTop = params.winningSegmentIndex * slice + slice / 2;
   const alignDeg = (360 - centerFromTop + 360) % 360;
 
   const fullTurns = 2 + (Math.abs(params.spinSeed) % 2);
@@ -54,6 +51,7 @@ export function Wheel(props: {
   winningSegmentIndex: number | null;
   highlightWinner?: boolean;
   spinSeed: number;
+  segments: WheelSegment[];
 }) {
   /** Total rotation after the last completed spin (for cumulative spins). */
   const lastSettledRotationRef = useRef(0);
@@ -78,11 +76,12 @@ export function Wheel(props: {
     const next = computeNextRotation({
       previousTotalRotation: lastSettledRotationRef.current,
       winningSegmentIndex: props.winningSegmentIndex,
-      spinSeed: props.spinSeed
+      spinSeed: props.spinSeed,
+      segmentCount: props.segments.length
     });
     targetRotationRef.current = next;
     return next;
-  }, [props.winningSegmentIndex, props.spinSeed]);
+  }, [props.winningSegmentIndex, props.spinSeed, props.segments.length]);
 
   useEffect(() => {
     if (!props.spinning && props.winningSegmentIndex !== null) {
@@ -91,22 +90,23 @@ export function Wheel(props: {
   }, [props.spinning, props.winningSegmentIndex]);
 
   const rotation = props.winningSegmentIndex === null ? 0 : targetRotation;
+  const segmentAngle = props.segments.length > 0 ? 360 / props.segments.length : 360;
   const trackBackground = useMemo(() => {
-    const colors = [...BASE_SEGMENT_COLORS];
+    const colors = props.segments.map((segment) => segment.segmentColor);
     if (props.highlightWinner && props.winningSegmentIndex !== null) {
       colors[props.winningSegmentIndex] = "#1ED760";
     }
 
     const stops = colors
       .map((color, index) => {
-        const start = index * SEGMENT_ANGLE;
-        const end = start + SEGMENT_ANGLE;
+        const start = index * segmentAngle;
+        const end = start + segmentAngle;
         return `${color} ${start}deg ${end}deg`;
       })
       .join(", ");
 
     return `conic-gradient(from 0deg at 50% 50%, ${stops})`;
-  }, [props.highlightWinner, props.winningSegmentIndex]);
+  }, [props.highlightWinner, props.winningSegmentIndex, props.segments, segmentAngle]);
 
   return (
     <div className="wheel-root">
@@ -129,8 +129,7 @@ export function Wheel(props: {
         <div className="wheel-surface-gloss" aria-hidden />
         <div className="wheel-top-sheen" aria-hidden />
         <svg className="wheel-label-layer" viewBox="0 0 100 100" aria-hidden>
-          {WHEEL_PRIZE_TABLE.map((segment, index) => {
-            const segmentAngle = 360 / WHEEL_PRIZE_TABLE.length;
+          {props.segments.map((segment, index) => {
             const startAngle = index * segmentAngle - 90;
             const midAngle = startAngle + segmentAngle / 2;
             const shouldFlip = midAngle > 90 && midAngle < 270;

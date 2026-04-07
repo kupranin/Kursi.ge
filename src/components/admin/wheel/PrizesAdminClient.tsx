@@ -289,7 +289,7 @@ export function PrizesAdminClient(props: { adminToken?: string }) {
             onChange={(event) => setForm((current) => ({ ...current, sort_order: Number(event.target.value) }))}
           />
           <input
-            placeholder="Segment color"
+            placeholder="Segment color (optional, auto if empty)"
             value={form.segment_color}
             onChange={(event) => setForm((current) => ({ ...current, segment_color: event.target.value }))}
           />

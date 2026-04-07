@@ -31,6 +31,8 @@ export type WheelWinRow = {
   user_id: string | null;
   phone: string | null;
   email: string | null;
+  campaign_id: string | null;
+  campaign_name_snapshot: string | null;
   prize_id: string;
   prize_name_snapshot: string;
   prize_label_snapshot: string;

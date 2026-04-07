@@ -1,13 +1,13 @@
 import { Wheel } from "@/components/rewards/Wheel";
-import { getPrizeBySegmentIndex } from "@/components/rewards/prizeTable";
+import type { WheelSegment } from "@/components/rewards/types";
 
 export function RewardResultState(props: {
   winningSegmentIndex: number;
   spinSeed: number;
+  wonPrizeLabel: string;
+  segments: WheelSegment[];
   onContinue: () => void;
 }) {
-  const wonPrize = getPrizeBySegmentIndex(props.winningSegmentIndex);
-
   return (
     <>
       <p className="wheel-eyebrow">გილოცავთ</p>
@@ -15,13 +15,14 @@ export function RewardResultState(props: {
       <p className="wheel-subheadline">
         გილოცავთ! მოგებული პრიზი დაემატა თქვენს პირად კაბინეტს.
       </p>
-      <p className="wheel-prize-value">{wonPrize.fullLabel}</p>
+      <p className="wheel-prize-value">{props.wonPrizeLabel}</p>
       <div className="wheel-stage is-success">
         <Wheel
           spinning={false}
           winningSegmentIndex={props.winningSegmentIndex}
           spinSeed={props.spinSeed}
           highlightWinner
+          segments={props.segments}
         />
       </div>
       <div className="wheel-actions">

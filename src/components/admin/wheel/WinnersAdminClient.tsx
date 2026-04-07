@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import type { WheelPrizeRow } from "@/lib/wheel/types";
+import type { WheelCampaignRow, WheelPrizeRow } from "@/lib/wheel/types";
 import type { WheelWinRow } from "@/lib/wheel/types";
 
 type WinnerFilters = {
@@ -15,12 +15,14 @@ type WinnerFilters = {
 export function WinnersAdminClient(props: { adminToken?: string }) {
   const [winners, setWinners] = useState<WheelWinRow[]>([]);
   const [prizes, setPrizes] = useState<WheelPrizeRow[]>([]);
+  const [campaigns, setCampaigns] = useState<WheelCampaignRow[]>([]);
   const [filters, setFilters] = useState<WinnerFilters>({
     dateFrom: "",
     dateTo: "",
     prizeId: "",
     q: ""
   });
+  const [campaignFilter, setCampaignFilter] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize] = useState(25);
   const [totalPages, setTotalPages] = useState(1);
@@ -40,6 +42,7 @@ export function WinnersAdminClient(props: { adminToken?: string }) {
     if (filters.dateFrom) params.set("dateFrom", filters.dateFrom);
     if (filters.dateTo) params.set("dateTo", filters.dateTo);
     if (filters.prizeId) params.set("prizeId", filters.prizeId);
+    if (campaignFilter) params.set("campaignId", campaignFilter);
     if (filters.q) params.set("q", filters.q);
     params.set("page", String(page));
     params.set("pageSize", String(pageSize));
@@ -69,8 +72,20 @@ export function WinnersAdminClient(props: { adminToken?: string }) {
     }
   }
 
+  async function loadCampaignsForFilter() {
+    try {
+      const response = await fetch("/api/admin/wheel/campaigns", { headers });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error ?? "Failed to load campaigns");
+      setCampaigns(payload.campaigns ?? []);
+    } catch {
+      // Optional filter, continue without campaigns.
+    }
+  }
+
   useEffect(() => {
     void loadPrizesForFilter();
+    void loadCampaignsForFilter();
   }, []);
 
   useEffect(() => {
@@ -119,7 +134,7 @@ export function WinnersAdminClient(props: { adminToken?: string }) {
 
       <section style={{ padding: 16, border: "1px solid #ddd", borderRadius: 12, marginBottom: 16 }}>
         <h2 style={{ marginTop: 0 }}>Filters</h2>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(180px, 1fr))", gap: 8 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(160px, 1fr))", gap: 8 }}>
           <input
             type="datetime-local"
             value={filters.dateFrom}
@@ -138,6 +153,14 @@ export function WinnersAdminClient(props: { adminToken?: string }) {
             {prizes.map((prize) => (
               <option key={prize.id} value={prize.id}>
                 {prize.display_label} ({prize.internal_name})
+              </option>
+            ))}
+          </select>
+          <select value={campaignFilter} onChange={(event) => setCampaignFilter(event.target.value)}>
+            <option value="">All campaigns</option>
+            {campaigns.map((campaign) => (
+              <option key={campaign.id} value={campaign.id}>
+                {campaign.name}
               </option>
             ))}
           </select>
@@ -183,6 +206,7 @@ export function WinnersAdminClient(props: { adminToken?: string }) {
             <tr>
               <th>Won At</th>
               <th>User/Contact</th>
+              <th>Campaign</th>
               <th>Prize</th>
               <th>Redeemed</th>
               <th>Admin note</th>
@@ -198,6 +222,7 @@ export function WinnersAdminClient(props: { adminToken?: string }) {
                   <div>{winner.phone ?? "-"}</div>
                   <div>{winner.email ?? "-"}</div>
                 </td>
+                <td>{winner.campaign_name_snapshot ?? "-"}</td>
                 <td>
                   <div>{winner.prize_name_snapshot}</div>
                   <small>{winner.prize_label_snapshot}</small>

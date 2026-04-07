@@ -1,11 +1,13 @@
 import type { RefObject } from "react";
 
 import { Wheel } from "@/components/rewards/Wheel";
+import type { WheelSegment } from "@/components/rewards/types";
 
 export function RewardIntroState(props: {
   spinning: boolean;
   winningSegmentIndex: number | null;
   spinSeed: number;
+  segments: WheelSegment[];
   errorMessage: string;
   spinButtonRef: RefObject<HTMLButtonElement | null>;
   onSpin: () => void;
@@ -23,6 +25,7 @@ export function RewardIntroState(props: {
           winningSegmentIndex={props.winningSegmentIndex}
           spinSeed={props.spinSeed}
           highlightWinner={false}
+          segments={props.segments}
         />
       </div>
       <div className="wheel-actions">

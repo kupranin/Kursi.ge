@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
     const dateFrom = searchParams.get("dateFrom");
     const dateTo = searchParams.get("dateTo");
     const prizeId = searchParams.get("prizeId");
+    const campaignId = searchParams.get("campaignId");
     const query = searchParams.get("q");
     const page = Math.max(1, Number(searchParams.get("page") ?? 1));
     const pageSize = Math.min(100, Math.max(1, Number(searchParams.get("pageSize") ?? 25)));
@@ -26,6 +27,7 @@ export async function GET(request: NextRequest) {
     if (dateFrom) statement = statement.gte("won_at", dateFrom);
     if (dateTo) statement = statement.lte("won_at", dateTo);
     if (prizeId) statement = statement.eq("prize_id", prizeId);
+    if (campaignId) statement = statement.eq("campaign_id", campaignId);
     if (query) {
       statement = statement.or(`phone.ilike.%${query}%,email.ilike.%${query}%`);
     }

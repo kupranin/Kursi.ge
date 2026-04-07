@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = (await request.json().catch(() => ({}))) as {
       user_id?: string;
+      userId?: string;
       phone?: string;
       email?: string;
     };
@@ -85,9 +86,11 @@ export async function POST(request: NextRequest) {
     }
 
     const winPayload = {
-      user_id: body.user_id ?? null,
+      user_id: body.user_id ?? body.userId ?? null,
       phone: body.phone ?? null,
       email: body.email ?? null,
+      campaign_id: campaign.id,
+      campaign_name_snapshot: campaign.name,
       prize_id: selected.id,
       prize_name_snapshot: selected.internal_name,
       prize_label_snapshot: selected.display_label,
