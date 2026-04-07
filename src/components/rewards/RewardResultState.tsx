@@ -14,7 +14,7 @@ export function RewardResultState(props: {
       <p className="wheel-eyebrow">გილოცავთ</p>
       <h2>VIP კურსი გააქტიურდა</h2>
       <p className="wheel-subheadline">
-        გამოიყენე სპეციალური კურსი მომდევნო 7 დღის განმავლობაში
+        გილოცავთ! მოგებული პრიზი დაემატა თქვენს პირად კაბინეტს.
       </p>
       <p className="wheel-prize-value">{wonPrize.fullLabel}</p>
       <div className="wheel-stage is-success">

@@ -13,6 +13,7 @@ const SPIN_MS = 2200;
 export function RegistrationWheelModal(props: {
   onDone: () => void;
   forceOpen?: boolean;
+  registeredUserId?: string;
 }) {
   const forcePreview = props.forceOpen === true;
   const [demoMode, setDemoMode] = useState(false);
@@ -123,7 +124,13 @@ export function RegistrationWheelModal(props: {
 
     try {
       const response = await fetch("/api/rewards/spin-registration-wheel", {
-        method: "POST"
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          userId: props.registeredUserId ?? null
+        })
       });
       const payload = (await response.json()) as SpinResponse & { code?: string };
       if (!response.ok || !payload.success) {
