@@ -217,8 +217,12 @@ export function RegistrationWheelModal(props: {
         setErrorMessage("ID უნდა შედგებოდეს ზუსტად 11 ციფრისგან.");
       } else if (code === "NO_ACTIVE_CAMPAIGN" || code === "NO_AVAILABLE_PRIZES") {
         setErrorMessage("ამ ეტაპზე ბორბალი მიუწვდომელია. სცადეთ მოგვიანებით.");
+      } else if (code === "CAMPAIGN_STOCK_EXHAUSTED") {
+        setErrorMessage("კამპანიის პრიზები ამოწურულია.");
+      } else if (code === "PRIZE_NOT_IN_WHEEL") {
+        setErrorMessage("პრიზების სია შეიცვალა. გთხოვთ განაახლოთ გვერდი და თავიდან სცადოთ.");
       } else {
-        setErrorMessage("გთხოვთ სცადოთ თავიდან");
+        setErrorMessage(`გთხოვთ სცადოთ თავიდან (${code})`);
       }
       setSpinPending(false);
       setSpinning(false);
