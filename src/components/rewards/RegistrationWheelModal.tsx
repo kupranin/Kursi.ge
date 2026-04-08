@@ -37,7 +37,7 @@ export function RegistrationWheelModal(props: {
   }, []);
 
   useEffect(() => {
-    if (previewMode) {
+    if (previewMode || forcePreview) {
       setOpen(true);
       setLoadingEligibility(false);
       setDismissedBeforeSpin(false);
@@ -65,7 +65,7 @@ export function RegistrationWheelModal(props: {
     return () => {
       active = false;
     };
-  }, [previewMode]);
+  }, [previewMode, forcePreview]);
 
   useEffect(() => {
     if (!open) {
