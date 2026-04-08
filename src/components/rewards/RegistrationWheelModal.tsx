@@ -186,7 +186,7 @@ export function RegistrationWheelModal(props: {
       });
       const payload = (await response.json()) as SpinResponse & { error?: string };
       if (!response.ok || !payload.success) {
-        throw new Error(payload.error ?? "SPIN_FAILED");
+        throw new Error(payload.error || `HTTP_${response.status}` || "SPIN_FAILED");
       }
       const index = segments.findIndex((segment) => segment.id === payload.prize.id);
       if (index < 0) throw new Error("PRIZE_NOT_IN_WHEEL");

@@ -31,7 +31,8 @@ export async function POST(request: NextRequest) {
       .select("user_identifier", { count: "exact", head: true })
       .eq("user_identifier", userId);
     if (blockedCheckError) {
-      return NextResponse.json({ error: blockedCheckError.message }, { status: 500 });
+      console.error("wheel spin blocked check failed", blockedCheckError);
+      return NextResponse.json({ error: "BLOCKED_CHECK_FAILED" }, { status: 500 });
     }
     if ((blockedCount ?? 0) > 0) {
       return NextResponse.json({ error: "ID_NOT_ELIGIBLE" }, { status: 403 });
@@ -46,7 +47,10 @@ export async function POST(request: NextRequest) {
       .gte("ends_at", nowIso)
       .order("created_at", { ascending: false })
       .limit(1);
-    if (campaignError) return NextResponse.json({ error: campaignError.message }, { status: 500 });
+    if (campaignError) {
+      console.error("wheel spin campaign load failed", campaignError);
+      return NextResponse.json({ error: "CAMPAIGN_LOAD_FAILED" }, { status: 500 });
+    }
 
     const campaign = (campaignData?.[0] ?? null) as WheelCampaignRow | null;
     if (!campaign) return NextResponse.json({ error: "NO_ACTIVE_CAMPAIGN" }, { status: 400 });
@@ -70,11 +74,13 @@ export async function POST(request: NextRequest) {
         .select("id", { count: "exact", head: true })
         .eq("user_id", userId);
       if (legacyWinCheck.error) {
-        return NextResponse.json({ error: legacyWinCheck.error.message }, { status: 500 });
+        console.error("wheel spin legacy win check failed", legacyWinCheck.error);
+        return NextResponse.json({ error: "WIN_CHECK_FAILED" }, { status: 500 });
       }
       existingWinCount = legacyWinCheck.count ?? 0;
     } else if (scopedWinCheck.error) {
-      return NextResponse.json({ error: scopedWinCheck.error.message }, { status: 500 });
+      console.error("wheel spin win check failed", scopedWinCheck.error);
+      return NextResponse.json({ error: "WIN_CHECK_FAILED" }, { status: 500 });
     } else {
       existingWinCount = scopedWinCheck.count ?? 0;
     }
@@ -88,7 +94,10 @@ export async function POST(request: NextRequest) {
       .eq("campaign_id", campaign.id)
       .eq("is_active", true)
       .order("sort_order", { ascending: true });
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error("wheel spin prize load failed", error);
+      return NextResponse.json({ error: "PRIZE_LOAD_FAILED" }, { status: 500 });
+    }
 
     const activePrizes = ((data ?? []) as WheelPrizeRow[]).filter((prize) => isEligibleNow(prize, nowIso));
     if (activePrizes.length === 0) {
@@ -103,7 +112,10 @@ export async function POST(request: NextRequest) {
         .update({ stock_used: selected.stock_used + 1 })
         .eq("id", selected.id)
         .lt("stock_used", selected.stock_limit);
-      if (stockError) return NextResponse.json({ error: stockError.message }, { status: 500 });
+      if (stockError) {
+        console.error("wheel spin prize stock update failed", stockError);
+        return NextResponse.json({ error: "PRIZE_STOCK_UPDATE_FAILED" }, { status: 500 });
+      }
     }
 
     if (campaign.total_prizes_limit !== null) {
@@ -113,7 +125,8 @@ export async function POST(request: NextRequest) {
         .eq("id", campaign.id)
         .lt("total_prizes_used", campaign.total_prizes_limit);
       if (campaignStockError) {
-        return NextResponse.json({ error: campaignStockError.message }, { status: 500 });
+        console.error("wheel spin campaign stock update failed", campaignStockError);
+        return NextResponse.json({ error: "CAMPAIGN_STOCK_UPDATE_FAILED" }, { status: 500 });
       }
     } else {
       const { error: campaignUsageError } = await supabase
@@ -121,7 +134,8 @@ export async function POST(request: NextRequest) {
         .update({ total_prizes_used: campaign.total_prizes_used + 1 })
         .eq("id", campaign.id);
       if (campaignUsageError) {
-        return NextResponse.json({ error: campaignUsageError.message }, { status: 500 });
+        console.error("wheel spin campaign usage update failed", campaignUsageError);
+        return NextResponse.json({ error: "CAMPAIGN_USAGE_UPDATE_FAILED" }, { status: 500 });
       }
     }
 
@@ -163,7 +177,10 @@ export async function POST(request: NextRequest) {
       winError = fallbackResult.error;
     }
 
-    if (winError) return NextResponse.json({ error: winError.message }, { status: 500 });
+    if (winError) {
+      console.error("wheel spin win insert failed", winError);
+      return NextResponse.json({ error: "WIN_INSERT_FAILED" }, { status: 500 });
+    }
 
     return NextResponse.json({
       success: true,
@@ -176,7 +193,8 @@ export async function POST(request: NextRequest) {
         segment_color: selected.segment_color
       }
     });
-  } catch {
+  } catch (error) {
+    console.error("wheel spin unexpected error", error);
     return NextResponse.json({ error: "SPIN_FAILED" }, { status: 500 });
   }
 }
