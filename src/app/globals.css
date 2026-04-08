@@ -70,8 +70,8 @@ body {
 
 .wheel-subheadline {
   margin: 12px 0 24px;
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: 14px;
+  line-height: 1.42;
   letter-spacing: 0.015em;
   color: #4b4171;
 }
@@ -82,6 +82,8 @@ body {
 
 .wheel-title {
   margin: 0;
+  font-size: clamp(22px, 3vw, 30px);
+  line-height: 1.2;
 }
 
 .wheel-actions {
@@ -332,16 +334,16 @@ body {
 }
 
 .wheel-svg-label {
-  font-size: clamp(3.1px, 1.18vw, 4px);
+  font-size: clamp(2.6px, 1.02vw, 3.4px);
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   color: #fffdfd;
   fill: #fffdfd;
   line-height: 1.2;
   text-align: center;
   paint-order: stroke;
   stroke: rgba(42, 20, 82, 0.28);
-  stroke-width: 0.32px;
+  stroke-width: 0.26px;
   text-shadow:
     0 1px 1px rgba(24, 8, 16, 0.3);
 }

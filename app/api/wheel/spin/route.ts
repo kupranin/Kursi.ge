@@ -57,15 +57,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "CAMPAIGN_STOCK_EXHAUSTED" }, { status: 400 });
     }
 
-    const { count: existingWinCount, error: existingWinError } = await supabase
+    let existingWinCount = 0;
+    const scopedWinCheck = await supabase
       .from("wheel_wins")
       .select("id", { count: "exact", head: true })
       .eq("campaign_id", campaign.id)
       .eq("user_id", userId);
-    if (existingWinError) {
-      return NextResponse.json({ error: existingWinError.message }, { status: 500 });
+    if (scopedWinCheck.error && /campaign_id/i.test(scopedWinCheck.error.message)) {
+      // Backward compatibility: older schema may not have campaign_id yet.
+      const legacyWinCheck = await supabase
+        .from("wheel_wins")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId);
+      if (legacyWinCheck.error) {
+        return NextResponse.json({ error: legacyWinCheck.error.message }, { status: 500 });
+      }
+      existingWinCount = legacyWinCheck.count ?? 0;
+    } else if (scopedWinCheck.error) {
+      return NextResponse.json({ error: scopedWinCheck.error.message }, { status: 500 });
+    } else {
+      existingWinCount = scopedWinCheck.count ?? 0;
     }
-    if ((existingWinCount ?? 0) > 0) {
+    if (existingWinCount > 0) {
       return NextResponse.json({ error: "ALREADY_SPUN_FOR_CAMPAIGN" }, { status: 409 });
     }
 
