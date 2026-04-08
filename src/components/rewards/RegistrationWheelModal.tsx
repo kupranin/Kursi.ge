@@ -5,9 +5,10 @@ import { useEffect, useRef, useState } from "react";
 import { RewardIntroState } from "@/components/rewards/RewardIntroState";
 import { RewardModalShell } from "@/components/rewards/RewardModalShell";
 import { RewardResultState } from "@/components/rewards/RewardResultState";
+import { SPIN_DURATION_MS } from "@/components/rewards/spinConfig";
 import type { SpinResponse, WheelSegment } from "@/components/rewards/types";
 
-const SPIN_MS = 3200;
+const SPIN_MS = SPIN_DURATION_MS;
 const DEFAULT_SEGMENT_COLORS = [
   "#5B2E8F",
   "#7B4DFF",
@@ -163,6 +164,7 @@ export function RegistrationWheelModal(props: {
       return;
     }
     setSpinPending(true);
+    setSpinning(true);
     const nextSeed = spinSeed + 1;
     setSpinSeed(nextSeed);
 
@@ -190,7 +192,6 @@ export function RegistrationWheelModal(props: {
       if (index < 0) throw new Error("PRIZE_NOT_IN_WHEEL");
       setWinningSegmentIndex(index);
       setWonPrizeLabel(payload.prize.display_label);
-      setSpinning(true);
       setSpinPending(false);
 
       if (spinTimeoutRef.current) clearTimeout(spinTimeoutRef.current);

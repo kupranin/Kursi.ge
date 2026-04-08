@@ -1,8 +1,16 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import Image from "next/image";
 import { useEffect, useMemo, useRef } from "react";
 
+import {
+  KICKOFF_TURNS,
+  MAX_FULL_TURNS,
+  MIN_FULL_TURNS,
+  SPIN_DURATION_MS,
+  SPIN_EASING
+} from "@/components/rewards/spinConfig";
 import type { WheelSegment } from "@/components/rewards/types";
 
 const VIEWBOX_SIZE = 100;
@@ -37,7 +45,8 @@ function computeNextRotation(params: {
   const centerFromTop = params.winningSegmentIndex * slice + slice / 2;
   const alignDeg = (360 - centerFromTop + 360) % 360;
 
-  const fullTurns = 2 + (Math.abs(params.spinSeed) % 2);
+  const turnSpan = MAX_FULL_TURNS - MIN_FULL_TURNS + 1;
+  const fullTurns = MIN_FULL_TURNS + (Math.abs(params.spinSeed) % turnSpan);
   const extraSpin = 360 * fullTurns;
 
   const currentMod = ((params.previousTotalRotation % 360) + 360) % 360;
@@ -56,17 +65,29 @@ export function Wheel(props: {
   /** Total rotation after the last completed spin (for cumulative spins). */
   const lastSettledRotationRef = useRef(0);
   const targetRotationRef = useRef(0);
+  const kickoffSpinSeedRef = useRef<number | null>(null);
   /** Cache so we do not recompute (and add more turns) on re-renders with the same spin. */
   const spinKeyRef = useRef<string | null>(null);
+  const deltaRotationRef = useRef(0);
 
   const targetRotation = useMemo(() => {
     if (props.winningSegmentIndex === null) {
       spinKeyRef.current = null;
-      lastSettledRotationRef.current = 0;
-      targetRotationRef.current = 0;
-      return 0;
+      if (props.spinning) {
+        if (kickoffSpinSeedRef.current !== props.spinSeed) {
+          kickoffSpinSeedRef.current = props.spinSeed;
+          // Immediate visual motion while waiting for backend winner response.
+          targetRotationRef.current = lastSettledRotationRef.current + 360 * KICKOFF_TURNS;
+          deltaRotationRef.current = 360 * KICKOFF_TURNS;
+        }
+        return targetRotationRef.current;
+      }
+      kickoffSpinSeedRef.current = null;
+      targetRotationRef.current = lastSettledRotationRef.current;
+      return lastSettledRotationRef.current;
     }
 
+    kickoffSpinSeedRef.current = null;
     const key = `${props.winningSegmentIndex}-${props.spinSeed}`;
     if (spinKeyRef.current === key) {
       return targetRotationRef.current;
@@ -74,12 +95,14 @@ export function Wheel(props: {
 
     spinKeyRef.current = key;
     const next = computeNextRotation({
-      previousTotalRotation: lastSettledRotationRef.current,
+      // If kickoff rotation already started, continue forward from that target.
+      previousTotalRotation: Math.max(lastSettledRotationRef.current, targetRotationRef.current),
       winningSegmentIndex: props.winningSegmentIndex,
       spinSeed: props.spinSeed,
       segmentCount: props.segments.length
     });
     targetRotationRef.current = next;
+    deltaRotationRef.current = Math.max(0, next - lastSettledRotationRef.current);
     return next;
   }, [props.winningSegmentIndex, props.spinSeed, props.segments.length]);
 
@@ -89,8 +112,22 @@ export function Wheel(props: {
     }
   }, [props.spinning, props.winningSegmentIndex]);
 
-  const rotation = props.winningSegmentIndex === null ? 0 : targetRotation;
+  const rotation = targetRotation;
   const segmentAngle = props.segments.length > 0 ? 360 / props.segments.length : 360;
+  const plannedTickCount = Math.max(8, Math.round(deltaRotationRef.current / segmentAngle));
+  const tickMs = Math.max(46, Math.round(SPIN_DURATION_MS / plannedTickCount));
+
+  useEffect(() => {
+    if (!props.spinning || typeof window === "undefined") return;
+    const id = window.setInterval(() => {
+      window.dispatchEvent(
+        new CustomEvent("wheel:pointer-tick", {
+          detail: { spinSeed: props.spinSeed }
+        })
+      );
+    }, tickMs);
+    return () => window.clearInterval(id);
+  }, [props.spinning, props.spinSeed, tickMs]);
   const trackBackground = useMemo(() => {
     const colors = props.segments.map((segment) => segment.segmentColor);
     if (props.highlightWinner && props.winningSegmentIndex !== null) {
@@ -108,9 +145,15 @@ export function Wheel(props: {
     return `conic-gradient(from 0deg at 50% 50%, ${stops})`;
   }, [props.highlightWinner, props.winningSegmentIndex, props.segments, segmentAngle]);
 
+  const wheelStyle = {
+    "--wheel-spin-duration": `${SPIN_DURATION_MS}ms`,
+    "--wheel-spin-ease": SPIN_EASING,
+    "--wheel-pointer-tick-ms": `${tickMs}ms`
+  } as CSSProperties;
+
   return (
-    <div className="wheel-root">
-      <div className="wheel-pointer-wrap" aria-hidden>
+    <div className={`wheel-root ${props.highlightWinner ? "wheel-root--win-flash" : ""}`} style={wheelStyle}>
+      <div className={`wheel-pointer-wrap ${props.spinning ? "is-ticking" : ""}`} aria-hidden>
         <div className="wheel-pointer-glow" />
         <div className="wheel-pointer" />
       </div>
