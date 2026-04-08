@@ -7,7 +7,7 @@ import { RewardModalShell } from "@/components/rewards/RewardModalShell";
 import { RewardResultState } from "@/components/rewards/RewardResultState";
 import type { SpinResponse, WheelSegment } from "@/components/rewards/types";
 
-const SPIN_MS = 2200;
+const SPIN_MS = 3200;
 
 export function RegistrationWheelModal(props: {
   onDone: () => void;

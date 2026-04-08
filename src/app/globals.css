@@ -246,13 +246,15 @@ body {
   position: relative;
   z-index: 1;
   transition: none;
+  will-change: transform;
+  transform: translateZ(0);
   box-shadow:
     0 10px 20px rgba(66, 44, 110, 0.16),
     0 2px 0 rgba(255, 255, 255, 0.5) inset;
 }
 
 .wheel-disc--spinning {
-  transition: transform 2.15s cubic-bezier(0.18, 0.92, 0.22, 1);
+  transition: transform 3.2s cubic-bezier(0.15, 0.85, 0.25, 1);
 }
 
 .wheel-disc.winner-highlight {
