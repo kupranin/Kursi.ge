@@ -97,11 +97,32 @@ export async function POST(request: NextRequest) {
       weight_snapshot: selected.weight
     };
 
-    const { data: insertedWin, error: winError } = await supabase
+    let { data: insertedWin, error: winError } = await supabase
       .from("wheel_wins")
       .insert(winPayload)
       .select("*")
       .single();
+
+    // Backward compatibility: if campaign snapshot columns are not migrated yet, save win without them.
+    if (winError && /campaign_id|campaign_name_snapshot/i.test(winError.message)) {
+      const fallbackPayload = {
+        user_id: body.user_id ?? body.userId ?? null,
+        phone: body.phone ?? null,
+        email: body.email ?? null,
+        prize_id: selected.id,
+        prize_name_snapshot: selected.internal_name,
+        prize_label_snapshot: selected.display_label,
+        weight_snapshot: selected.weight
+      };
+      const fallbackResult = await supabase
+        .from("wheel_wins")
+        .insert(fallbackPayload)
+        .select("*")
+        .single();
+      insertedWin = fallbackResult.data;
+      winError = fallbackResult.error;
+    }
+
     if (winError) return NextResponse.json({ error: winError.message }, { status: 500 });
 
     return NextResponse.json({
