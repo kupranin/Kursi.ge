@@ -22,6 +22,21 @@ export async function POST(request: NextRequest) {
     };
 
     const supabase = createSupabaseAdminClient();
+    const userId = String(body.user_id ?? body.userId ?? "").trim();
+    if (!/^\d{11}$/.test(userId)) {
+      return NextResponse.json({ error: "INVALID_USER_ID" }, { status: 400 });
+    }
+    const { count: blockedCount, error: blockedCheckError } = await supabase
+      .from("clients_import")
+      .select("user_identifier", { count: "exact", head: true })
+      .eq("user_identifier", userId);
+    if (blockedCheckError) {
+      return NextResponse.json({ error: blockedCheckError.message }, { status: 500 });
+    }
+    if ((blockedCount ?? 0) > 0) {
+      return NextResponse.json({ error: "ID_NOT_ELIGIBLE" }, { status: 403 });
+    }
+
     const nowIso = new Date().toISOString();
     const { data: campaignData, error: campaignError } = await supabase
       .from("wheel_campaigns")
@@ -86,7 +101,7 @@ export async function POST(request: NextRequest) {
     }
 
     const winPayload = {
-      user_id: body.user_id ?? body.userId ?? null,
+      user_id: userId,
       phone: body.phone ?? null,
       email: body.email ?? null,
       campaign_id: campaign.id,
@@ -106,7 +121,7 @@ export async function POST(request: NextRequest) {
     // Backward compatibility: if campaign snapshot columns are not migrated yet, save win without them.
     if (winError && /campaign_id|campaign_name_snapshot/i.test(winError.message)) {
       const fallbackPayload = {
-        user_id: body.user_id ?? body.userId ?? null,
+        user_id: userId,
         phone: body.phone ?? null,
         email: body.email ?? null,
         prize_id: selected.id,
