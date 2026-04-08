@@ -40,6 +40,7 @@ export function RegistrationWheelModal(props: {
   const [wonPrizeLabel, setWonPrizeLabel] = useState("");
   const [segments, setSegments] = useState<WheelSegment[]>([]);
   const [spinCompleted, setSpinCompleted] = useState(false);
+  const [spinPending, setSpinPending] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const spinButtonRef = useRef<HTMLButtonElement>(null);
   const spinTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -87,6 +88,7 @@ export function RegistrationWheelModal(props: {
       setWonPrizeLabel("");
       setSpinCompleted(false);
       setSpinning(false);
+      setSpinPending(false);
       setErrorMessage("");
       setSpinSeed(0);
       if (spinTimeoutRef.current) {
@@ -154,16 +156,19 @@ export function RegistrationWheelModal(props: {
   }, [open, spinning, spinCompleted]);
 
   async function handleSpin() {
+    if (spinning || spinPending || spinCompleted) return;
     setErrorMessage("");
     if (segments.length === 0) {
       setErrorMessage("პრიზები დროებით მიუწვდომელია");
       return;
     }
+    setSpinPending(true);
     const nextSeed = spinSeed + 1;
     setSpinSeed(nextSeed);
 
     if (previewMode) {
       resolvePreviewSpin(nextSeed);
+      setSpinPending(false);
       return;
     }
 
@@ -186,6 +191,7 @@ export function RegistrationWheelModal(props: {
       setWinningSegmentIndex(index);
       setWonPrizeLabel(payload.prize.display_label);
       setSpinning(true);
+      setSpinPending(false);
 
       if (spinTimeoutRef.current) clearTimeout(spinTimeoutRef.current);
       spinTimeoutRef.current = setTimeout(() => {
@@ -193,13 +199,20 @@ export function RegistrationWheelModal(props: {
         setSpinCompleted(true);
         spinTimeoutRef.current = null;
       }, SPIN_MS);
-    } catch {
+    } catch (error) {
       if (previewMode) {
         resolvePreviewSpin(nextSeed);
+        setSpinPending(false);
         return;
       }
+      const code = error instanceof Error ? error.message : "SPIN_FAILED";
+      if (code === "ALREADY_SPUN_FOR_CAMPAIGN") {
+        setErrorMessage("ამ კამპანიაში ბორბალი უკვე დატრიალებულია ამ ID-ით.");
+      } else {
+        setErrorMessage("გთხოვთ სცადოთ თავიდან");
+      }
+      setSpinPending(false);
       setSpinning(false);
-      setErrorMessage("გთხოვთ სცადოთ თავიდან");
     }
   }
 
@@ -219,6 +232,7 @@ export function RegistrationWheelModal(props: {
           {!spinCompleted ? (
             <RewardIntroState
               spinning={spinning}
+              spinPending={spinPending}
               winningSegmentIndex={winningSegmentIndex}
               spinSeed={spinSeed}
               segments={segments}

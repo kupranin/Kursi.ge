@@ -57,6 +57,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "CAMPAIGN_STOCK_EXHAUSTED" }, { status: 400 });
     }
 
+    const { count: existingWinCount, error: existingWinError } = await supabase
+      .from("wheel_wins")
+      .select("id", { count: "exact", head: true })
+      .eq("campaign_id", campaign.id)
+      .eq("user_id", userId);
+    if (existingWinError) {
+      return NextResponse.json({ error: existingWinError.message }, { status: 500 });
+    }
+    if ((existingWinCount ?? 0) > 0) {
+      return NextResponse.json({ error: "ALREADY_SPUN_FOR_CAMPAIGN" }, { status: 409 });
+    }
+
     const { data, error } = await supabase
       .from("wheel_prizes")
       .select("*")

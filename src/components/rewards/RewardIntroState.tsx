@@ -5,6 +5,7 @@ import type { WheelSegment } from "@/components/rewards/types";
 
 export function RewardIntroState(props: {
   spinning: boolean;
+  spinPending: boolean;
   winningSegmentIndex: number | null;
   spinSeed: number;
   segments: WheelSegment[];
@@ -33,11 +34,11 @@ export function RewardIntroState(props: {
           ref={props.spinButtonRef}
           className="wheel-primary"
           onClick={props.onSpin}
-          disabled={props.spinning}
+          disabled={props.spinning || props.spinPending}
         >
-          {props.spinning ? "იტრიალებს..." : "დაატრიალე"}
+          {props.spinning ? "იტრიალებს..." : props.spinPending ? "ვამუშავებთ..." : "დაატრიალე"}
         </button>
-        {!props.spinning ? (
+        {!props.spinning && !props.spinPending ? (
           <button className="wheel-secondary" onClick={props.onDismiss}>
             მოგვიანებით
           </button>
