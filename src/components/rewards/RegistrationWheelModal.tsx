@@ -164,7 +164,6 @@ export function RegistrationWheelModal(props: {
       return;
     }
     setSpinPending(true);
-    setSpinning(true);
     const nextSeed = spinSeed + 1;
     setSpinSeed(nextSeed);
 
@@ -193,6 +192,7 @@ export function RegistrationWheelModal(props: {
       setWinningSegmentIndex(index);
       setWonPrizeLabel(payload.prize.display_label);
       setSpinPending(false);
+      setSpinning(true);
 
       if (spinTimeoutRef.current) clearTimeout(spinTimeoutRef.current);
       spinTimeoutRef.current = setTimeout(() => {
