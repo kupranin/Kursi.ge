@@ -45,7 +45,11 @@ export function RewardIntroState(props: {
         ) : null}
       </div>
       <p className="wheel-note">ერთჯერადი შეთავაზება ახალი მომხმარებლისთვის</p>
-      {props.errorMessage ? <small>{props.errorMessage}</small> : null}
+      {props.errorMessage ? (
+        <p style={{ marginTop: 10, color: "#9f2b52", fontSize: 13, fontWeight: 600 }}>
+          {props.errorMessage}
+        </p>
+      ) : null}
     </>
   );
 }

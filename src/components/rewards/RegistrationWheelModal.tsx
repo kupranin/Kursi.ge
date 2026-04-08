@@ -208,6 +208,14 @@ export function RegistrationWheelModal(props: {
       const code = error instanceof Error ? error.message : "SPIN_FAILED";
       if (code === "ALREADY_SPUN_FOR_CAMPAIGN") {
         setErrorMessage("ამ კამპანიაში ბორბალი უკვე დატრიალებულია ამ ID-ით.");
+      } else if (code === "ID_NOT_ELIGIBLE") {
+        setErrorMessage(
+          "ამ ID-ით ბორბლის შეთავაზება ვერ აქტიურდება. გთხოვთ გადაამოწმოთ მონაცემები."
+        );
+      } else if (code === "INVALID_USER_ID") {
+        setErrorMessage("ID უნდა შედგებოდეს ზუსტად 11 ციფრისგან.");
+      } else if (code === "NO_ACTIVE_CAMPAIGN" || code === "NO_AVAILABLE_PRIZES") {
+        setErrorMessage("ამ ეტაპზე ბორბალი მიუწვდომელია. სცადეთ მოგვიანებით.");
       } else {
         setErrorMessage("გთხოვთ სცადოთ თავიდან");
       }
