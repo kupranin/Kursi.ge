@@ -588,8 +588,7 @@ body {
   .wheel-primary,
   .wheel-secondary,
   .wheel-center-cap--spinning,
-  .wheel-disc.winner-highlight,
-  .wheel-disc--spinning {
+  .wheel-disc.winner-highlight {
     animation: none !important;
     transition: none !important;
   }
