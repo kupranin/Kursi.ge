@@ -67,22 +67,22 @@ export async function POST(request: NextRequest) {
       .select("id", { count: "exact", head: true })
       .eq("campaign_id", campaign.id)
       .eq("user_id", userId);
-    if (scopedWinCheck.error && /campaign_id/i.test(scopedWinCheck.error.message)) {
-      // Backward compatibility: older schema may not have campaign_id yet.
+    if (!scopedWinCheck.error) {
+      existingWinCount = scopedWinCheck.count ?? 0;
+    } else {
+      // Backward compatibility: fall back to legacy schema/filters if scoped check fails.
       const legacyWinCheck = await supabase
         .from("wheel_wins")
         .select("id", { count: "exact", head: true })
         .eq("user_id", userId);
       if (legacyWinCheck.error) {
-        console.error("wheel spin legacy win check failed", legacyWinCheck.error);
+        console.error("wheel spin win check failed", {
+          scoped: scopedWinCheck.error,
+          legacy: legacyWinCheck.error
+        });
         return NextResponse.json({ error: "WIN_CHECK_FAILED" }, { status: 500 });
       }
       existingWinCount = legacyWinCheck.count ?? 0;
-    } else if (scopedWinCheck.error) {
-      console.error("wheel spin win check failed", scopedWinCheck.error);
-      return NextResponse.json({ error: "WIN_CHECK_FAILED" }, { status: 500 });
-    } else {
-      existingWinCount = scopedWinCheck.count ?? 0;
     }
     if (existingWinCount > 0) {
       return NextResponse.json({ error: "ALREADY_SPUN_FOR_CAMPAIGN" }, { status: 409 });
