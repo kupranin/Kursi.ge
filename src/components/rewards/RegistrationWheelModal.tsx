@@ -8,6 +8,20 @@ import { RewardResultState } from "@/components/rewards/RewardResultState";
 import type { SpinResponse, WheelSegment } from "@/components/rewards/types";
 
 const SPIN_MS = 3200;
+const DEFAULT_SEGMENT_COLORS = [
+  "#5B2E8F",
+  "#7B4DFF",
+  "#9A6CFF",
+  "#5B2E8F",
+  "#7B4DFF",
+  "#9A6CFF",
+  "#5B2E8F",
+  "#1ED760",
+  "#7B4DFF",
+  "#9A6CFF",
+  "#5B2E8F",
+  "#2EE58A"
+];
 
 export function RegistrationWheelModal(props: {
   onDone: () => void;
@@ -105,11 +119,12 @@ export function RegistrationWheelModal(props: {
         const response = await fetch("/api/wheel/prizes");
         const payload = await response.json();
         if (!response.ok || !active) return;
-        const dbSegments = (payload.prizes ?? []).slice(0, 12).map((prize: any) => ({
+        const dbSegments = (payload.prizes ?? []).slice(0, 12).map((prize: any, index: number) => ({
           id: String(prize.id),
           shortLabel: String(prize.display_label),
           fullLabel: String(prize.display_label),
-          segmentColor: String(prize.segment_color ?? "#7B4DFF")
+          // Keep wheel palette consistent with approved campaign visual.
+          segmentColor: DEFAULT_SEGMENT_COLORS[index % DEFAULT_SEGMENT_COLORS.length]
         })) as WheelSegment[];
         setSegments(dbSegments);
       } catch {

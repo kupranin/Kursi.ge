@@ -4,7 +4,20 @@ import { assertAdminRequest } from "@/lib/adminAuth";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { WheelPrizeRow } from "@/lib/wheel/types";
 
-const AUTO_SEGMENT_COLORS = ["#5B2E8F", "#7B4DFF", "#9A6CFF", "#6B1F46", "#A53667", "#B83C73"];
+const AUTO_SEGMENT_COLORS = [
+  "#5B2E8F",
+  "#7B4DFF",
+  "#9A6CFF",
+  "#5B2E8F",
+  "#7B4DFF",
+  "#9A6CFF",
+  "#5B2E8F",
+  "#1ED760",
+  "#7B4DFF",
+  "#9A6CFF",
+  "#5B2E8F",
+  "#2EE58A"
+];
 
 function withProbability(rows: WheelPrizeRow[]) {
   const activeTotalWeight = rows
